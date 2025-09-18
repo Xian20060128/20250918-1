@@ -23,6 +23,7 @@ namespace _20250918_1
         public MainWindow()
         {
             InitializeComponent();
+
         }
     }
 }
