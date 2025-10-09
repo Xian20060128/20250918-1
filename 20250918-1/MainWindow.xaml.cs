@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,6 +13,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.IO;
 
 namespace _20250918_1
 {
@@ -21,14 +23,8 @@ namespace _20250918_1
     public partial class MainWindow : Window
     {
         //Dictionary<string, int> drinks = new Dictionary<string, int>();
-        Dictionary<string, int> drinks = new Dictionary<string, int>()
-        {
-            {"綠茶大杯", 50 },
-            {"紅茶大杯", 55},
-            {"清茶大杯", 45 },
-            {"綠茶小杯", 30 },
-            {"紅茶小杯", 35 }
-        };
+        Dictionary<string, int> drinks = new Dictionary<string, int>();
+       
 
         Dictionary<string, int> orders = new Dictionary<string, int>();
         string resultMessage = "";
@@ -36,6 +32,104 @@ namespace _20250918_1
         public MainWindow()
         {
             InitializeComponent();
+
+            //讀取飲料品項
+            AddDrinkItems(drinks);
+
+            //動態產生飲料品項選單
+            DisplyDrinkMenu(drinks);
+        }
+
+        private void DisplyDrinkMenu(Dictionary<string, int> drinks)
+        {
+            DrinkMenu_StackPanel.Children.Clear();
+
+            foreach (var drink in drinks)
+            {
+                StackPanel sp = new StackPanel
+                {
+                    Orientation = Orientation.Horizontal,
+                    Margin = new Thickness(2),
+                    Height = 35,
+                    VerticalAlignment = VerticalAlignment.Center,
+                    Background = Brushes.AliceBlue
+                };
+
+                CheckBox cb = new CheckBox
+                {
+                    Content = drink.Key,
+                    FontFamily = new FontFamily("微軟正黑體"),
+                    FontSize = 16,
+                    Margin = new Thickness(10, 0, 20, 0),
+                    VerticalContentAlignment = VerticalAlignment.Center,
+                    Foreground = Brushes.DarkBlue,
+                };
+
+                Label lb_price = new Label
+                {
+                    Content = $"{drink.Value} 元",
+                    FontFamily = new FontFamily("微軟正黑體"),
+                    FontSize = 16,
+                    Margin = new Thickness(10, 0, 20, 0),
+                    VerticalContentAlignment = VerticalAlignment.Center,
+                    Foreground = Brushes.DarkCyan
+                };
+
+                Slider sl = new Slider
+                {
+                    Width = 150,
+                    Minimum = 0,
+                    Maximum = 20,
+                    Value = 0,
+                    IsSnapToTickEnabled = true,
+                    VerticalAlignment = VerticalAlignment.Center,
+                };
+
+                Label lb_amount = new Label
+                {
+                    Content = "0",
+                    FontFamily = new FontFamily("微軟正黑體"),
+                    FontSize = 16,
+                    Margin = new Thickness(10, 0, 20, 0),
+                    VerticalContentAlignment = VerticalAlignment.Center,
+                    Foreground = Brushes.DarkGreen
+                };
+
+                Binding binding = new Binding("Value")
+                {
+                    Source = sl,
+                    Mode = BindingMode.OneWay
+                };
+                lb_amount.SetBinding(Label.ContentProperty, binding);
+
+                sp.Children.Add(cb);
+                sp.Children.Add(lb_price);
+                sp.Children.Add(sl);
+                sp.Children.Add(lb_amount);
+
+                DrinkMenu_StackPanel.Children.Add(sp);
+            }
+        }
+
+        private void AddDrinkItems(Dictionary<string, int> drinks)
+        {
+            //MessageBox.Show("請輸入飲料品項與價格，格式為 品項,價格 (輸入end結束)");
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Title = "請選擇飲料品項檔案";
+            openFileDialog.Filter = "CSV檔案(*.csv)|*.csv|所有檔案(*.*)|*.*";
+            if (openFileDialog.ShowDialog() == true)
+            {
+                string fileName = openFileDialog.FileName;
+                string[] lines = File.ReadAllLines(fileName);
+
+                foreach (var line in lines)
+                {
+                    string[] tokens = line.Split(',');
+                    string drinkName = tokens[0];
+                    int price = int.Parse(tokens[1]);
+                    drinks.Add(drinkName, price);
+                }
+            }
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
@@ -99,6 +193,16 @@ namespace _20250918_1
             resultMessage += $"折扣訊息：{discountMessage}，實付金額： {sellPrice}元。";
 
             Result_TextBlock.Text = resultMessage;
+
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            saveFileDialog.Title = "儲存訂購明細";
+            saveFileDialog.Filter = "文字檔案(*.txt)|*.txt|所有檔案(*.*)|*.*";
+
+            if (saveFileDialog.ShowDialog() == true)
+            {
+                string fileName = saveFileDialog.FileName;
+                File.WriteAllText(fileName, resultMessage);
+            }
         }
 
         private void RadioButton_Checked(object sender, RoutedEventArgs e)
@@ -107,7 +211,6 @@ namespace _20250918_1
             typeMessage = rb.Content.ToString();
         }
 
-      
        
     }
 }
