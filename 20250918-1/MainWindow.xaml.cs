@@ -17,12 +17,8 @@ using System.IO;
 
 namespace _20250918_1
 {
-    /// <summary>
-    /// MainWindow.xaml 的互動邏輯
-    /// </summary>
     public partial class MainWindow : Window
     {
-        //Dictionary<string, int> drinks = new Dictionary<string, int>();
         Dictionary<string, int> drinks = new Dictionary<string, int>();
        
 
@@ -32,11 +28,8 @@ namespace _20250918_1
         public MainWindow()
         {
             InitializeComponent();
-
-            //讀取飲料品項
+        
             AddDrinkItems(drinks);
-
-            //動態產生飲料品項選單
             DisplyDrinkMenu(drinks);
         }
 
@@ -113,7 +106,6 @@ namespace _20250918_1
 
         private void AddDrinkItems(Dictionary<string, int> drinks)
         {
-            //MessageBox.Show("請輸入飲料品項與價格，格式為 品項,價格 (輸入end結束)");
             OpenFileDialog openFileDialog = new OpenFileDialog();
             openFileDialog.Title = "請選擇飲料品項檔案";
             openFileDialog.Filter = "CSV檔案(*.csv)|*.csv|所有檔案(*.*)|*.*";
@@ -210,7 +202,5 @@ namespace _20250918_1
             var rb = sender as RadioButton;
             typeMessage = rb.Content.ToString();
         }
-
-       
     }
 }
